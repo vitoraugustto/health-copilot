@@ -28,7 +28,7 @@ export function App() {
   }
 
   return (
-    <Box gap="14px" hCenter vCenter minHeight="100vh">
+    <Box gap="14px" px="12px" hCenter vCenter minHeight="100vh">
       <ReactMic
         className="react-mic-styles"
         record={isRecording}
