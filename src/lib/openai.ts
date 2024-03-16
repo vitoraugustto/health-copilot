@@ -11,5 +11,6 @@ export function transcribe(file: File) {
   return openai.audio.transcriptions.create({
     file,
     model: 'whisper-1',
+    prompt: 'Transcreva sempre para português.',
   });
 }
