@@ -11,6 +11,7 @@ export default defineConfig({
       '@common': path.resolve(__dirname, './src/common/'),
       '@theme': path.resolve(__dirname, './src/theme'),
       '@lib': path.resolve(__dirname, './src/lib/'),
+      '@config': path.resolve(__dirname, './src/config/'),
     },
   },
   plugins: [react()],

@@ -26,7 +26,8 @@
       "@components": ["src/components"],
       "@common/*": ["src/common/*"],
       "@theme": ["src/theme"],
-      "@lib/*": ["src/lib/*"]
+      "@lib/*": ["src/lib/*"],
+      "@config/*": ["src/config/*"]
     }
   },
   "include": ["src"],
