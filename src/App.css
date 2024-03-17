@@ -37,7 +37,7 @@ ul {
 }
 
 .react-mic-styles {
-  height: 100px;
+  position: relative;
+  bottom: 55px;
   max-width: 100%;
-  border-radius: 16px;
 }
