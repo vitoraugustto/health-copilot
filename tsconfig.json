@@ -27,7 +27,8 @@
       "@common/*": ["src/common/*"],
       "@theme": ["src/theme"],
       "@lib/*": ["src/lib/*"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
+      "@pages/*": ["src/pages/*"]
     }
   },
   "include": ["src"],
