@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ReactMic, ReactMicStopEvent } from 'react-mic';
 
 import { Status } from '@common/types';
 import { Box, Button, Input, Text } from '@components';
-import { transcribe } from '@lib/openai';
+import { chatCompletion, transcribe } from '@lib/openai';
 import EditIcon from '@mui/icons-material/Edit';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -15,6 +15,10 @@ export function Copilot() {
   const [type, setType] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [transcribedAudio, setTranscribedAudio] = useState('');
+  const [anamnesis, setAnamnesis] = useState('');
+  const [status, setStatus] = useState<Status>('idle');
+  const [audio, setAudio] = useState<ReactMicStopEvent>();
 
   return (
     <Box
@@ -45,36 +49,57 @@ export function Copilot() {
             Consulta clínico geral (clínica médica)
           </MenuItem>
         </TextField>
-        <TranscribeAudio />
+
+        {transcribedAudio && status !== 'succeeded' && (
+          <GenerateAnamensis
+            status={status}
+            transcribedAudio={transcribedAudio}
+            setStatus={setStatus}
+            setAnamnesis={setAnamnesis}
+          />
+        )}
+        {!transcribedAudio && (
+          <TranscribeAudio
+            audio={audio}
+            setAudio={setAudio}
+            setStatus={setStatus}
+            setTranscribedAudio={setTranscribedAudio}
+          />
+        )}
+        {status === 'succeeded' && (
+          <Input
+            fullWidth
+            multiline
+            minRows="16"
+            value={anamnesis}
+            onChange={(e) => setAnamnesis(e.target.value)}
+          />
+        )}
       </Box>
     </Box>
   );
 }
 
-function TranscribeAudio() {
-  const theme = useTheme();
-
-  const [isRecording, setRecording] = useState<boolean>(false);
-  const [transcribedAudio, setTranscribedAudio] = useState('');
-  const [status, setStatus] = useState<Status>('idle');
-  const [audio, setAudio] = useState<ReactMicStopEvent>();
-
-  function handleTranscribe(_audio: ReactMicStopEvent) {
+function GenerateAnamensis({
+  status,
+  transcribedAudio,
+  setStatus,
+  setAnamnesis,
+}: {
+  status: Status;
+  transcribedAudio: string;
+  setStatus: React.Dispatch<React.SetStateAction<Status>>;
+  setAnamnesis: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  function generateAnamnesis() {
     setStatus('pending');
-
-    transcribe(createFile(_audio))
+    chatCompletion(transcribedAudio)
       .then((res) => {
         setStatus('succeeded');
-        setTranscribedAudio(res.text);
+        setAnamnesis(res.choices[0].message.content ?? '');
       })
       .catch(() => setStatus('failed'));
   }
-
-  const iconStyle = {
-    color: theme.palette.primary.main,
-    width: '90px',
-    height: '90px',
-  };
 
   return (
     <Box hCenter gap="12px">
@@ -84,15 +109,76 @@ function TranscribeAudio() {
         fontFamily="Titillium Web"
         fontSize="22px"
       >
-        {isRecording && !audio && 'Clique no botão abaixo para encerrar'}
-        {!isRecording &&
-          !audio &&
-          'Clique no botão abaixo para começar a gravar sua consulta'}
-        {audio &&
-          'Tudo pronto! Clique no botão abaixo para gerar seu prontuário com IA'}
+        Clique no botão abaixo para gerar seu prontuário com IA
+      </Text>
+      <Button
+        onClick={generateAnamnesis}
+        minWidth="220px"
+        loading={status === 'pending'}
+        disabled={status === 'pending'}
+        fullWidth={false}
+        text="Gerar prontuário"
+        startIcon={status !== 'pending' && <SmartToyIcon />}
+      />
+    </Box>
+  );
+}
+
+function TranscribeAudio({
+  audio,
+  setAudio,
+  setStatus,
+  setTranscribedAudio,
+}: {
+  audio?: ReactMicStopEvent;
+  setAudio: React.Dispatch<React.SetStateAction<ReactMicStopEvent | undefined>>;
+  setStatus: React.Dispatch<React.SetStateAction<Status>>;
+  setTranscribedAudio: React.Dispatch<React.SetStateAction<string>>;
+}) {
+  const theme = useTheme();
+
+  const [isRecording, setRecording] = useState<boolean>(false);
+
+  const iconStyle = {
+    color: theme.palette.primary.main,
+    width: '90px',
+    height: '90px',
+  };
+
+  function handleTranscribe() {
+    if (audio) {
+      transcribe(createFile(audio)).then((res) => {
+        setTranscribedAudio(res.text);
+      });
+    }
+  }
+
+  useEffect(() => {
+    handleTranscribe();
+  }, [audio]);
+
+  return (
+    <Box hCenter gap="12px">
+      <Text
+        align="center"
+        fontWeight="600"
+        fontFamily="Titillium Web"
+        fontSize="22px"
+      >
+        {isRecording
+          ? 'Clique no botão abaixo para encerrar'
+          : 'Clique no botão abaixo para começar a gravar sua consulta'}
       </Text>
       {!audio && (
-        <IconButton onClick={() => setRecording((prevState) => !prevState)}>
+        <IconButton
+          onClick={() => {
+            if (!isRecording) {
+              setRecording(true);
+            } else {
+              setRecording(false);
+            }
+          }}
+        >
           {isRecording ? (
             <StopCircleIcon style={iconStyle} />
           ) : (
@@ -100,7 +186,6 @@ function TranscribeAudio() {
           )}
         </IconButton>
       )}
-
       {!audio && (
         <ReactMic
           record={isRecording}
@@ -111,30 +196,6 @@ function TranscribeAudio() {
           noiseSuppression
           visualSetting="frequencyBars"
         />
-      )}
-      {audio && (
-        <Button
-          minWidth="220px"
-          loading={status === 'pending'}
-          fullWidth={false}
-          text="Gerar prontuário"
-          onClick={() => handleTranscribe(audio)}
-          startIcon={status !== 'pending' && <SmartToyIcon />}
-        />
-      )}
-      {transcribedAudio && (
-        <p style={{ fontSize: '14px', fontFamily: 'Titillium Web' }}>
-          TRANSCRIÇÃO:&nbsp;
-          <span
-            style={{
-              fontWeight: '600',
-              fontSize: '20px',
-              fontFamily: 'Titillium Web',
-            }}
-          >
-            {transcribedAudio}
-          </span>
-        </p>
       )}
     </Box>
   );
