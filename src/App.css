@@ -37,7 +37,9 @@ ul {
 }
 
 .react-mic-styles {
-  position: relative;
-  bottom: 55px;
   max-width: 100%;
+}
+
+.react-mic-styles-none {
+  max-height: 0px;
 }
