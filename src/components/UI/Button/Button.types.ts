@@ -10,6 +10,7 @@ export interface IButton {
   disabled?: boolean;
   borderRadius?: number | string;
   minWidth?: number | string;
+  maxWidth?: number | string;
   minHeight?: number | string;
   maxHeight?: number | string;
   fullWidth?: boolean;
