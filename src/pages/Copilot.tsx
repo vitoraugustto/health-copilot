@@ -127,7 +127,6 @@ function GenerateAnamensis({
 function TranscribeAudio({
   audio,
   setAudio,
-  setStatus,
   setTranscribedAudio,
 }: {
   audio?: ReactMicStopEvent;
