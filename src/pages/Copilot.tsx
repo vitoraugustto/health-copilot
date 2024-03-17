@@ -5,9 +5,9 @@ import { Status } from '@common/types';
 import { Box, Button, Input, Text } from '@components';
 import { transcribe } from '@lib/openai';
 import EditIcon from '@mui/icons-material/Edit';
-import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { IconButton, MenuItem, TextField, useTheme } from '@mui/material';
 
 export function Copilot() {
@@ -72,45 +72,54 @@ function TranscribeAudio() {
 
   const iconStyle = {
     color: theme.palette.primary.main,
-    width: '72px',
-    height: '72px',
+    width: '90px',
+    height: '90px',
   };
 
   return (
     <Box hCenter gap="12px">
-      <Text fontWeight="600" fontFamily="Titillium Web" fontSize="22px">
-        Clique no botão abaixo para começar a gravar sua consulta
-      </Text>
-      <IconButton
-        style={{
-          backgroundColor: '#fff',
-          position: 'relative',
-          zIndex: 2,
-          top: '50px',
-        }}
-        onClick={() => setRecording((prevState) => !prevState)}
+      <Text
+        align="center"
+        fontWeight="600"
+        fontFamily="Titillium Web"
+        fontSize="22px"
       >
-        {isRecording ? (
-          <PauseCircleIcon style={iconStyle} />
-        ) : (
-          <PlayCircleFilledIcon style={iconStyle} />
-        )}
-      </IconButton>
-      <ReactMic
-        record={isRecording}
-        className="react-mic-styles"
-        onStop={(e) => setAudio(e)}
-        strokeColor={theme.palette.primary.main}
-        mimeType="audio/webm"
-        noiseSuppression
-        visualSetting="frequencyBars"
-      />
+        {isRecording && !audio && 'Clique no botão abaixo para encerrar'}
+        {!isRecording &&
+          !audio &&
+          'Clique no botão abaixo para começar a gravar sua consulta'}
+        {audio &&
+          'Tudo pronto! Clique no botão abaixo para gerar seu prontuário com IA'}
+      </Text>
+      {!audio && (
+        <IconButton onClick={() => setRecording((prevState) => !prevState)}>
+          {isRecording ? (
+            <StopCircleIcon style={iconStyle} />
+          ) : (
+            <PlayCircleFilledIcon style={iconStyle} />
+          )}
+        </IconButton>
+      )}
+
+      {!audio && (
+        <ReactMic
+          record={isRecording}
+          className={isRecording ? 'react-mic-styles' : 'react-mic-styles-none'}
+          onStop={(e) => setAudio(e)}
+          strokeColor={theme.palette.primary.main}
+          mimeType="audio/webm"
+          noiseSuppression
+          visualSetting="frequencyBars"
+        />
+      )}
       {audio && (
         <Button
+          minWidth="220px"
+          loading={status === 'pending'}
           fullWidth={false}
           text="Gerar prontuário"
           onClick={() => handleTranscribe(audio)}
-          startIcon={<SmartToyIcon />}
+          startIcon={status !== 'pending' && <SmartToyIcon />}
         />
       )}
       {transcribedAudio && (
