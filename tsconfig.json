@@ -28,7 +28,8 @@
       "@theme": ["src/theme"],
       "@lib/*": ["src/lib/*"],
       "@config/*": ["src/config/*"],
-      "@pages/*": ["src/pages/*"]
+      "@pages/*": ["src/pages/*"],
+      "@stores/*": ["src/stores/*"]
     }
   },
   "include": ["src"],

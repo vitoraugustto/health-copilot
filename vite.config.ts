@@ -13,6 +13,7 @@ export default defineConfig({
       '@lib': path.resolve(__dirname, './src/lib/'),
       '@config': path.resolve(__dirname, './src/config/'),
       '@pages': path.resolve(__dirname, './src/pages/'),
+      '@stores': path.resolve(__dirname, './src/stores/'),
     },
   },
   plugins: [react()],
