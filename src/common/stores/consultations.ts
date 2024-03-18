@@ -13,7 +13,12 @@ export const useConsultationsStore = create(
     (set) => ({
       consultations: [],
       createConsultation: (id) =>
-        set((state) => ({ consultations: [...state.consultations, { id }] })),
+        set((state) => ({
+          consultations: [
+            ...state.consultations,
+            { id, title: '', description: '', anamnesis: '' },
+          ],
+        })),
 
       updateConsultation: (id, updatedConsultation) =>
         set((state) => ({
