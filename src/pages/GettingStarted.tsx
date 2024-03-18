@@ -1,9 +1,14 @@
-import { Background, Text } from '@components';
+import { Background, Box, Text } from '@components';
+import { useTheme } from '@mui/material';
 
 export function GettingStarted() {
+  const theme = useTheme();
+
   return (
-    <Background>
-      <Text>Getting Started</Text>
-    </Background>
+    <Box
+      minHeight="100vh"
+      backgroundColor={theme.palette.primary.light}
+      p="12px"
+    ></Box>
   );
 }
