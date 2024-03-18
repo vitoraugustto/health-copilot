@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ReactMic, ReactMicStopEvent } from 'react-mic';
+import { useParams } from 'react-router-dom';
 
+import { useConsultationsStore } from '@common/stores/consultations';
 import { Status } from '@common/types';
 import { Background, Box, Button, Input, Text } from '@components';
 import { chatCompletion, transcribe } from '@lib/openai';
@@ -12,61 +14,117 @@ import { IconButton, MenuItem, TextField, useTheme } from '@mui/material';
 
 export function Copilot() {
   const theme = useTheme();
-  const [type, setType] = useState('');
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const { consultations, updateConsultation } = useConsultationsStore();
+  const params = useParams() as { consultationID: string };
+
+  const [currentConsultation, setCurrentConsultation] = useState(
+    consultations.find(
+      (consultation) => consultation.id === params.consultationID,
+    ),
+  );
+  // const [type, setType] = useState('');
+  const [title, setTitle] = useState(currentConsultation?.title ?? '');
+  const [description, setDescription] = useState(
+    currentConsultation?.description ?? '',
+  );
   const [transcribedAudio, setTranscribedAudio] = useState('');
-  const [anamnesis, setAnamnesis] = useState('');
+  const [anamnesis, setAnamnesis] = useState(
+    currentConsultation?.anamnesis ?? '',
+  );
   const [status, setStatus] = useState<Status>('idle');
   const [audio, setAudio] = useState<ReactMicStopEvent>();
+
+  const getCurrentConsultation = () => {
+    setAudio(undefined);
+    setTranscribedAudio('');
+    setCurrentConsultation(
+      consultations.find(
+        (consultation) => consultation.id === params.consultationID,
+      ),
+    );
+  };
+
+  useEffect(() => {
+    getCurrentConsultation();
+  }, [params.consultationID]);
+
+  useEffect(() => {
+    if (currentConsultation) {
+      setTitle(currentConsultation.title ?? '');
+      setDescription(currentConsultation.description ?? '');
+      setAnamnesis(currentConsultation.anamnesis ?? '');
+    }
+  }, [currentConsultation]);
+
+  console.log(anamnesis === '');
 
   return (
     <Background>
       <Input
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => {
+          updateConsultation(params.consultationID, { title: e.target.value });
+          setTitle(e.target.value);
+        }}
         label="Título da consulta"
         endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
       />
       <Input
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={(e) => {
+          updateConsultation(params.consultationID, {
+            description: e.target.value,
+          });
+          setDescription(e.target.value);
+        }}
         label="Descrição da consulta"
         endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
       />
       <TextField
-        onChange={(e) => setType(e.target.value)}
-        value={type ?? ''}
+        // onChange={(e) => setType(e.target.value)}
+        value="clinic"
         select
+        disabled
         label="Tipo da consulta"
       >
         <MenuItem value="clinic">
           Consulta clínico geral (clínica médica)
         </MenuItem>
       </TextField>
-      {transcribedAudio && status !== 'succeeded' && (
-        <GenerateAnamnesis
-          status={status}
-          transcribedAudio={transcribedAudio}
-          setStatus={setStatus}
-          setAnamnesis={setAnamnesis}
-        />
-      )}
-      {!transcribedAudio && (
-        <TranscribeAudio
-          audio={audio}
-          setAudio={setAudio}
-          setStatus={setStatus}
-          setTranscribedAudio={setTranscribedAudio}
-        />
-      )}
-      {status === 'succeeded' && (
+      {currentConsultation?.anamnesis === '' &&
+        anamnesis === '' &&
+        transcribedAudio &&
+        transcribedAudio !== '' &&
+        audio && (
+          <GenerateAnamnesis
+            status={status}
+            transcribedAudio={transcribedAudio}
+            setStatus={setStatus}
+            setAnamnesis={setAnamnesis}
+            getCurrentConsultation={getCurrentConsultation}
+          />
+        )}
+      {(currentConsultation?.anamnesis === '' || anamnesis === '') &&
+        transcribedAudio === '' && (
+          <TranscribeAudio
+            audio={audio}
+            setAudio={setAudio}
+            setStatus={setStatus}
+            setTranscribedAudio={setTranscribedAudio}
+          />
+        )}
+      {(currentConsultation?.anamnesis || anamnesis) && (
         <Input
           fullWidth
           multiline
           minRows="16"
           value={anamnesis}
-          onChange={(e) => setAnamnesis(e.target.value)}
+          onChange={(e) => {
+            updateConsultation(params.consultationID, {
+              anamnesis: e.target.value,
+            });
+            setAnamnesis(e.target.value);
+          }}
         />
       )}
     </Background>
@@ -83,13 +141,20 @@ function GenerateAnamnesis({
   transcribedAudio: string;
   setStatus: React.Dispatch<React.SetStateAction<Status>>;
   setAnamnesis: React.Dispatch<React.SetStateAction<string>>;
+  getCurrentConsultation: () => void;
 }) {
+  const { updateConsultation } = useConsultationsStore();
+  const params = useParams() as { consultationID: string };
+
   function generateAnamnesis() {
     setStatus('pending');
     chatCompletion(transcribedAudio)
       .then((res) => {
         setStatus('succeeded');
         setAnamnesis(res.choices[0].message.content ?? '');
+        updateConsultation(params.consultationID, {
+          anamnesis: res.choices[0].message.content ?? '',
+        });
       })
       .catch(() => setStatus('failed'));
   }
