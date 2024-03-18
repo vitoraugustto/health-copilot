@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ReactMic, ReactMicStopEvent } from 'react-mic';
 
 import { Status } from '@common/types';
-import { Box, Button, Input, Text } from '@components';
+import { Background, Box, Button, Input, Text } from '@components';
 import { chatCompletion, transcribe } from '@lib/openai';
 import EditIcon from '@mui/icons-material/Edit';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
@@ -21,66 +21,59 @@ export function Copilot() {
   const [audio, setAudio] = useState<ReactMicStopEvent>();
 
   return (
-    <Box
-      minHeight="100vh"
-      backgroundColor={theme.palette.primary.light}
-      p="12px"
-    >
-      <Box borderRadius="8px" gap="18px" backgroundColor="white" p="12px">
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          label="Título da consulta"
-          endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
+    <Background>
+      <Input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        label="Título da consulta"
+        endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
+      />
+      <Input
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        label="Descrição da consulta"
+        endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
+      />
+      <TextField
+        onChange={(e) => setType(e.target.value)}
+        value={type ?? ''}
+        select
+        label="Tipo da consulta"
+      >
+        <MenuItem value="clinic">
+          Consulta clínico geral (clínica médica)
+        </MenuItem>
+      </TextField>
+      {transcribedAudio && status !== 'succeeded' && (
+        <GenerateAnamnesis
+          status={status}
+          transcribedAudio={transcribedAudio}
+          setStatus={setStatus}
+          setAnamnesis={setAnamnesis}
         />
-        <Input
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          label="Descrição da consulta"
-          endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
+      )}
+      {!transcribedAudio && (
+        <TranscribeAudio
+          audio={audio}
+          setAudio={setAudio}
+          setStatus={setStatus}
+          setTranscribedAudio={setTranscribedAudio}
         />
-        <TextField
-          onChange={(e) => setType(e.target.value)}
-          value={type ?? ''}
-          select
-          label="Tipo da consulta"
-        >
-          <MenuItem value="clinic">
-            Consulta clínico geral (clínica médica)
-          </MenuItem>
-        </TextField>
-
-        {transcribedAudio && status !== 'succeeded' && (
-          <GenerateAnamensis
-            status={status}
-            transcribedAudio={transcribedAudio}
-            setStatus={setStatus}
-            setAnamnesis={setAnamnesis}
-          />
-        )}
-        {!transcribedAudio && (
-          <TranscribeAudio
-            audio={audio}
-            setAudio={setAudio}
-            setStatus={setStatus}
-            setTranscribedAudio={setTranscribedAudio}
-          />
-        )}
-        {status === 'succeeded' && (
-          <Input
-            fullWidth
-            multiline
-            minRows="16"
-            value={anamnesis}
-            onChange={(e) => setAnamnesis(e.target.value)}
-          />
-        )}
-      </Box>
-    </Box>
+      )}
+      {status === 'succeeded' && (
+        <Input
+          fullWidth
+          multiline
+          minRows="16"
+          value={anamnesis}
+          onChange={(e) => setAnamnesis(e.target.value)}
+        />
+      )}
+    </Background>
   );
 }
 
-function GenerateAnamensis({
+function GenerateAnamnesis({
   status,
   transcribedAudio,
   setStatus,
