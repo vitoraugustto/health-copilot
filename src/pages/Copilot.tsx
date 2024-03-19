@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import { useConsultationsStore } from '@common/stores/consultations';
 import { Status } from '@common/types';
-import { Background, Box, Button, Input, Text } from '@components';
+import { Background, Box, Button, Input, Text, Toast } from '@components';
 import { chatCompletion, transcribe } from '@lib/openai';
 import EditIcon from '@mui/icons-material/Edit';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
@@ -34,6 +34,8 @@ export function Copilot() {
   const [status, setStatus] = useState<Status>('idle');
   const [audio, setAudio] = useState<ReactMicStopEvent>();
 
+  const [showToast, setShowToast] = useState(false);
+
   const getCurrentConsultation = () => {
     setAudio(undefined);
     setTranscribedAudio('');
@@ -55,8 +57,6 @@ export function Copilot() {
       setAnamnesis(currentConsultation.anamnesis ?? '');
     }
   }, [currentConsultation]);
-
-  console.log(anamnesis === '');
 
   return (
     <Background>
@@ -116,7 +116,11 @@ export function Copilot() {
       {(currentConsultation?.anamnesis || anamnesis) && (
         <Box gap="12px">
           <Button
-            onClick={() => navigator.clipboard.writeText(anamnesis)}
+            onClick={() =>
+              navigator.clipboard
+                .writeText(anamnesis)
+                .then(() => setShowToast(true))
+            }
             variant="outlined"
             style={{ alignSelf: 'flex-end' }}
             fullWidth={false}
@@ -136,6 +140,12 @@ export function Copilot() {
           />
         </Box>
       )}
+      <Toast
+        text="Copiado com sucesso!"
+        severity="success"
+        open={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </Background>
   );
 }
@@ -222,8 +232,6 @@ function TranscribeAudio({
   useEffect(() => {
     handleTranscribe();
   }, [audio]);
-
-  console.log(audio);
 
   return (
     <Box hCenter gap="12px">
