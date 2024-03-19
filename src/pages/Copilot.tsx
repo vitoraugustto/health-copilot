@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ReactMic, ReactMicStopEvent } from 'react-mic';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { useParams } from 'react-router-dom';
 
 import { useConsultationsStore } from '@common/stores/consultations';
@@ -126,18 +128,18 @@ export function Copilot() {
             fullWidth={false}
             text="Copiar texto"
           />
-          <Input
-            fullWidth
-            multiline
-            minRows="16"
-            value={anamnesis}
-            onChange={(e) => {
-              updateConsultation(params.consultationID, {
-                anamnesis: e.target.value,
-              });
-              setAnamnesis(e.target.value);
-            }}
-          />
+          <Box flexDirection="column">
+            <ReactQuill
+              theme="snow"
+              value={anamnesis}
+              onChange={(value) => {
+                updateConsultation(params.consultationID, {
+                  anamnesis: value,
+                });
+                setAnamnesis(value);
+              }}
+            />
+          </Box>
         </Box>
       )}
       <Toast
