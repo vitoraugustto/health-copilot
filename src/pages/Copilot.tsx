@@ -114,18 +114,27 @@ export function Copilot() {
           />
         )}
       {(currentConsultation?.anamnesis || anamnesis) && (
-        <Input
-          fullWidth
-          multiline
-          minRows="16"
-          value={anamnesis}
-          onChange={(e) => {
-            updateConsultation(params.consultationID, {
-              anamnesis: e.target.value,
-            });
-            setAnamnesis(e.target.value);
-          }}
-        />
+        <Box gap="12px">
+          <Button
+            onClick={() => navigator.clipboard.writeText(anamnesis)}
+            variant="outlined"
+            style={{ alignSelf: 'flex-end' }}
+            fullWidth={false}
+            text="Copiar texto"
+          />
+          <Input
+            fullWidth
+            multiline
+            minRows="16"
+            value={anamnesis}
+            onChange={(e) => {
+              updateConsultation(params.consultationID, {
+                anamnesis: e.target.value,
+              });
+              setAnamnesis(e.target.value);
+            }}
+          />
+        </Box>
       )}
     </Background>
   );
@@ -213,6 +222,8 @@ function TranscribeAudio({
   useEffect(() => {
     handleTranscribe();
   }, [audio]);
+
+  console.log(audio);
 
   return (
     <Box hCenter gap="12px">
