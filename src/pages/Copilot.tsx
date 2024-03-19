@@ -13,7 +13,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
-import { IconButton, MenuItem, TextField, useTheme } from '@mui/material';
+import {
+  CircularProgress,
+  IconButton,
+  MenuItem,
+  TextField,
+  useTheme,
+} from '@mui/material';
 
 export function Copilot() {
   const theme = useTheme();
@@ -237,6 +243,7 @@ function TranscribeAudio({
 }) {
   const theme = useTheme();
 
+  const [transcribeStatus, setTranscribeStatus] = useState<Status>('idle');
   const [isRecording, setRecording] = useState<boolean>(false);
 
   const iconStyle = {
@@ -247,7 +254,10 @@ function TranscribeAudio({
 
   function handleTranscribe() {
     if (audio) {
+      setTranscribeStatus('pending');
+
       transcribe(createFile(audio)).then((res) => {
+        setTranscribeStatus('succeeded');
         setTranscribedAudio(res.text);
       });
     }
@@ -256,6 +266,27 @@ function TranscribeAudio({
   useEffect(() => {
     handleTranscribe();
   }, [audio]);
+
+  if (transcribeStatus === 'pending') {
+    return (
+      <Box hCenter gap="28px">
+        <Box hCenter vCenter>
+          <Text
+            fontWeight="600"
+            color="teal"
+            fontFamily="Titillium Web"
+            fontSize="28px"
+          >
+            Processando áudio
+          </Text>
+          <Text fontFamily="Titillium Web">
+            Isso pode levar alguns segundos...
+          </Text>
+        </Box>
+        <CircularProgress thickness={4.5} size={50} />
+      </Box>
+    );
+  }
 
   return (
     <Box hCenter gap="12px">
