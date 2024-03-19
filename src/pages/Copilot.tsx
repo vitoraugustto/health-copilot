@@ -1,3 +1,4 @@
+import copy from 'copy-to-clipboard';
 import { useEffect, useState } from 'react';
 import { ReactMic, ReactMicStopEvent } from 'react-mic';
 import ReactQuill from 'react-quill';
@@ -118,11 +119,11 @@ export function Copilot() {
       {(currentConsultation?.anamnesis || anamnesis) && (
         <Box gap="12px">
           <Button
-            onClick={() =>
-              navigator.clipboard
-                .writeText(anamnesis)
-                .then(() => setShowToast(true))
-            }
+            onClick={() => {
+              copy(anamnesis, { format: 'text/html' });
+
+              setShowToast(true);
+            }}
             variant="outlined"
             style={{ alignSelf: 'flex-end' }}
             fullWidth={false}
