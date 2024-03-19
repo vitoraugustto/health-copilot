@@ -16,7 +16,7 @@ export const useConsultationsStore = create(
         set((state) => ({
           consultations: [
             ...state.consultations,
-            { id, title: '', description: '', anamnesis: '' },
+            { id, title: '', description: '', anamnesis: '', type: '' },
           ],
         })),
 
@@ -39,5 +39,6 @@ interface IConsultation {
   id?: string;
   title?: string;
   description?: string;
+  type?: string;
   anamnesis?: string;
 }

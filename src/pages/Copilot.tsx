@@ -25,7 +25,7 @@ export function Copilot() {
       (consultation) => consultation.id === params.consultationID,
     ),
   );
-  const [type, setType] = useState('');
+  const [type, setType] = useState(currentConsultation?.type ?? '');
   const [title, setTitle] = useState(currentConsultation?.title ?? '');
   const [description, setDescription] = useState(
     currentConsultation?.description ?? '',
@@ -58,6 +58,7 @@ export function Copilot() {
       setTitle(currentConsultation.title ?? '');
       setDescription(currentConsultation.description ?? '');
       setAnamnesis(currentConsultation.anamnesis ?? '');
+      setType(currentConsultation.type ?? '');
     }
   }, [currentConsultation]);
 
@@ -84,8 +85,13 @@ export function Copilot() {
         endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
       />
       <TextField
-        onChange={(e) => setType(e.target.value)}
-        value={type ?? ''}
+        onChange={(e) => {
+          setType(e.target.value);
+          updateConsultation(params.consultationID, {
+            type: e.target.value,
+          });
+        }}
+        value={type}
         select
         label="Tipo da consulta"
       >
