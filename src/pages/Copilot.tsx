@@ -273,7 +273,7 @@ function TranscribeAudio({
         <Box hCenter vCenter>
           <Text
             fontWeight="600"
-            color="teal"
+            color={theme.palette.primary.dark}
             fontFamily="Titillium Web"
             fontSize="28px"
           >
