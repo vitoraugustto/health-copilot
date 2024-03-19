@@ -25,7 +25,7 @@ export function Copilot() {
       (consultation) => consultation.id === params.consultationID,
     ),
   );
-  // const [type, setType] = useState('');
+  const [type, setType] = useState('');
   const [title, setTitle] = useState(currentConsultation?.title ?? '');
   const [description, setDescription] = useState(
     currentConsultation?.description ?? '',
@@ -84,14 +84,29 @@ export function Copilot() {
         endAdornment={<EditIcon sx={{ color: theme.palette.primary.main }} />}
       />
       <TextField
-        // onChange={(e) => setType(e.target.value)}
-        value="clinic"
+        onChange={(e) => setType(e.target.value)}
+        value={type ?? ''}
         select
-        disabled
         label="Tipo da consulta"
       >
         <MenuItem value="clinic">
-          Consulta clínico geral (clínica médica)
+          Consulta Clínico Geral (Clínica Médica)
+        </MenuItem>
+        <MenuItem value="dermatology">
+          Consulta Dermatologia (Cuidados com a Pele)
+        </MenuItem>
+        <MenuItem value="ortopedia">
+          Consulta Ortopedia (Tratamento de Lesões e Doenças
+          Musculoesqueléticas)
+        </MenuItem>
+        <MenuItem value="cardiologia">
+          Consulta Cardiologia (Saúde do Coração e Circulação)
+        </MenuItem>
+        <MenuItem value="oftalmologia">
+          Consulta Oftalmologia (Cuidados com os Olhos e Visão)
+        </MenuItem>
+        <MenuItem value="pediatria">
+          Consulta Pediatria (Cuidados Médicos Especializados para Crianças)
         </MenuItem>
       </TextField>
       {currentConsultation?.anamnesis === '' &&
